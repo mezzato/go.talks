@@ -1,0 +1,691 @@
+Google Go: an introduction to the language
+
+8 Feb 2013
+
+# Go is a general-purpose language that bridges the gap between efficient
+# statically typed languages and productive dynamic language. But it’s not just
+# the language that makes Go special – Go has broad and consistent standard
+# libraries and powerful but simple tools.
+# 
+# This talk gives an introduction to Go, followed by a tour of some real
+# programs that demonstrate the power, scope, and simplicity of the Go
+# programming environment.
+
+* Video
+
+A video of this talk was recorded at Øredev in Malmö, Sweden in November 2012.
+
+.link http://vimeo.com/53221558 Watch the talk on Vimeo
+
+Andrew Gerrand
+Google Inc.
+http://golang.org
+
+
+* Background
+
+* Why a new language?
+
+Motivated by Google's needs:
+
+- Efficiency
+- Safety
+- Concurrency
+- Scalability
+- Fast development cycle
+- No surprises
+
+* Design
+
+"Consensus drove the design. Nothing went into the language until [Ken Thompson, Robert Griesemer, and myself] all agreed that it was right. Some features didn’t get resolved until after a year or more of discussion." - Rob Pike
+
+Go is:
+
+- Lightweight, avoids unnecessary repetition
+- Object Oriented, but not in the usual way
+- Concurrent, in a way that keeps you sane
+- Designed for working programmers
+
+* The web is best up-to-date reference
+
+web site: 
+
+.link http://golang.org/
+
+
+- _try_ it out even if the web design is a bit "geeky"
+	
+- have a look at the _documentation_
+	
+- browse through the _packages_ to get a feel
+	
+- Go Nuts _mailing_ _list_
+	
+- Go _project_ _dashboard_
+
+
+* Go 1
+
+Released in March 2012
+
+A specification of the language and libraries that will be supported for years.
+
+The guarantee: code written for Go 1.0 will build and run with Go 1.x.
+
+"Best thing we ever did."
+
+* The gopher
+
+.image simple/gopher.jpg
+
+* Hello, go
+
+.play simple/hello.go
+
+* Go is a trade-off between dynamically and statically-typed languages
+
+* The "Java-like" side
+
+- compiled
+- runtime and garbage collector
+
+but: 
+
+- no runtime installation or byte-code (not running in the background)
+- no classes 
+- no inheritance
+- no generics
+
+* The "functional" side
+
+- functions are first-class objects (closures etc.)
+- interfaces are inferred by the compiler and never explicit
+- simple and intuitive APIs
+- compilation units and fast parsing
+
+but:
+
+- much faster
+- the compiler makes things safer 
+
+* Our project
+
+* Our project
+
+A command-line program that fetches and displays the latest headlines from the `golang` page on Reddit.
+# (Reddit is a huge link aggregation site where people submit links and other people vote on and have discussions about them.)
+
+The program will:
+- make an HTTP request to the Reddit API,
+- decode the JSON response into a Go data structure, and
+- print each link's title, URL, and number of comments.
+
+To get started, create directory inside your namespace called `reddit`:
+
+  $ mkdir $GOPATH/src/github.com/nf/reddit
+  
+This is where you will put your Go source files.
+
+
+* Make an HTTP request
+
+This program makes an HTTP request to the Reddit API and copies its response to standard output.  Put this in a file named `main.go` inside your `reddit` directory.
+
+.code simple/1get.go
+
+# If you run it you should see a blob of JSON data, or an error message if something goes wrong.
+
+# There's a lot going on here, so let's break it down. 
+
+
+* Make an HTTP request: package statement
+
+All Go code belongs to a package.
+
+.code simple/1get.go /package/
+
+Go programs begin with function `main` inside package `main`.
+
+
+* Make an HTTP request: import statement
+
+The import declaration specifies the file's dependencies.
+
+.code simple/1get.go /import/,/\)/
+
+Each string is an import path. It tells the Go tools where to find the package.
+
+These packages are all from the Go standard library.
+
+
+* Make an HTTP request: function declaration
+
+.code simple/1get.go /func.main/,/^}/ HLfunc
+
+This is a function declaration. The main function takes no arguments and has no return values.
+
+* Make an HTTP request: http.Get
+
+.code simple/1get.go /func.main/,/^}/ HLget
+
+Call the `Get` function from the `http` package, passing the URL of the Reddit API as its only argument.
+
+Declare two variables (`resp` and `err`) and give them the return values of the function call. (Yes, Go functions can return multiple values.) The `Get` function returns `*http.Response` and an `error` values.
+
+
+* Make an HTTP request: error handling
+
+.code simple/1get.go /func.main/,/^}/ HLerr
+
+Compare `err` against `nil`, the zero-value for the built-in `error` type.
+
+The `err` variable will be nil if the request was successful.
+
+If not, call the `log.Fatal` function to print the error message and exit the program.
+
+# I cannot overstate the importance of error checking. Disregard error values at your peril!
+
+
+* Make an HTTP request: check status
+
+.code simple/1get.go /func.main/,/^}/ HLstatus
+
+Test that the HTTP server returned a "200 OK" response.
+
+If not, bail, printing the HTTP status message ("500 Internal Server Error", for example).
+
+
+* Make an HTTP request: copy
+
+.code simple/1get.go /func.main/,/^}/ HLcopy
+
+Use `io.Copy` to copy the HTTP response body  to standard output (`os.Stdout`).
+
+#On the left is a variable assignment that stores the error return value of the Copy in err. Note that this is different to the previous assignment which was also a declaration. This simple assignment - distinguished by the absence of a colon - assigns the second return value of the Copy to the err variable. The first return value, which appears to be assigned to an underscore, is thrown away. The underscore can be thought of as a "write only variable".
+
+  package io
+
+  func Copy(dst Writer, src Reader) (written int64, err error)
+
+The `resp.Body` type implements `io.Reader` and `os.Stdout` implements `io.Writer`.
+
+* Test it
+
+.play simple/1get.go
+
+
+* Decoding the JSON response
+
+* Data structures
+
+The Reddit API returns JSON data like this:
+
+  {"data": {"children": [
+    {"data": {
+      "title": "The Go homepage",
+      "url": "http://golang.org/",
+      ...
+    }},
+    ...
+  ]}}
+
+Go's `json` package decodes JSON-encoded data into native Go data structures. To decode the API response, declare some types that reflect the structure of the JSON data:
+
+.code simple/2json.go /type.Item/,/^}/
+
+
+* Decode the response
+
+Instead of copying the HTTP response body to standard output
+
+.code simple/1get.go /io.Copy/
+
+we use the json package to decode the response into our Response data structure.
+
+.code simple/2json.go /new.Response/,/json.NewDecoder/
+
+Initialize a new `Response` value, store a pointer to it in the new variable `r`.
+
+Create a new `json.Decoder` object and decode the response body into `r`.
+
+As the decoder parses the JSON data it looks for corresponding fields of the same names in the `Response` struct. The `"data"` field of the top-level JSON object is decoded into the `Response` struct's `Data` field, and JSON array `"children"` is decoded into the `Children` slice, and so on.
+
+
+* Print the data
+
+    for _, child := range r.Data.Children {
+      fmt.Println(child.Data.Title)
+    }
+
+Iterate over the `Children` slice, assigning the slice value to `child` on each iteration.
+
+The `Println` call prints the item's `Title` followed by a newline.
+
+
+* Tidying up
+
+* Separation of concerns
+
+So far, all the action happens in the main function.
+
+As the program grows, structure and modularity become important.
+
+What if we want to check several subreddits? Or share this functionality with another program?
+
+Create a function named `Get` that takes the name of subreddit, makes the API call, and returns the items from that subreddit.
+
+.code simple/3func.go /func.Get/
+
+`Get` takes a string, `reddit`, and returns a slice of `Item` and an `error` value.
+
+* Get: construct the URL
+
+.code simple/3func.go /func.Get/,/^}/ HLurl
+
+Use `fmt.Sprintf` to construct the request URL from the provided `reddit` string.
+
+* Get: return
+
+.code simple/3func.go /func.Get/,/^}/ HLreturn
+
+Exiting the function, return a nil slice and a non-nil error value, or vice versa.
+
+* Get: making an error
+
+.code simple/3func.go /func.Get/,/^}/ HLerrors
+
+The response's `Status` field is just a string; use the `errors.New` function to convert it to an `error` value.
+
+* Get: defer clean-up work
+
+.code simple/3func.go /func.Get/,/^}/ HLclose
+
+Defer a call to the response body's `Close` method, to guarantee that we clean up after the HTTP request. The call will be executed after the function returns.
+
+# It's important to Close the response Body, because it tells the http package that you have finished reading, freeing up the HTTP connection to for re-used (the Go http package uses Keep-Alive and connection pooling by default). If we want to use our Get function in the context of a larger program, it must clean up properly.
+
+# TODO(adg): about defer
+
+* Get: prepare the response
+
+.code simple/3func.go /func.Get/,/^}/ HLprepare
+
+Use the make function to allocate an `Item` slice big enough to store the response data.
+
+* Get: convert the response
+
+.code simple/3func.go /func.Get/,/^}/ HLconvert
+
+Iterate over the response's `Children` slice, assigning each child's `Data` element to the corresponding element in the items slice.
+
+* Use Get in main
+
+In the `main` function, replace the http request and JSON decoding code with a single call to `Get`.
+
+.code simple/3func.go /func.main/,/^}/
+
+The print loop becomes clearer, too.
+
+However, it's not very useful to print only the title of the items. Let's address that.
+
+
+* Formatted output
+
+* The Stringer interface
+
+The `fmt` package knows how to format the built-in types, but it can be told how to format user-defined types, too.
+
+When you pass a value to the `fmt.Print` functions, it checks to see if it implements the `fmt.Stringer` interface:
+
+  type Stringer interface {
+    String() string
+  }
+
+Any type that implements a `String() string` method is a `Stringer`, and the `fmt` package will use that method to format values of that type.
+
+
+* Formatting Items
+
+A method declaration is just like a function declaration, but the receiver comes first.
+
+Here's a `String` method for the `Item` type that returns the title, a newline, and the URL:
+
+  func (i Item) String() string {
+    return fmt.Sprintf("%s\n%s", i.Title, i.URL)
+  }
+
+To print the item we just pass it to Println, which uses the provided `String` method to format the `Item`.
+
+  fmt.Println(item)
+  
+* Test it
+
+.play simple/4method.go /func.main/,/^}/
+
+* The modern side
+
+- cross-platform
+- modern functionality (networking, websockets, JSON e.g.)
+- orthogonality, one way of doing things
+- _concurrent_
+
+* Still missing
+
+- a nice web framework
+
+- a cross-platform desktop framework
+
+* Standard library
+
+* Packages
+
+Go code lives in packages.
+
+Packages contain type, function, variable, and constant declarations.
+
+Packages can be very small (package `errors` has just one declaration) or very large (package `net/http` has >100 declarations). Most are somewhere in between.
+
+Case determines visibility: `Foo` is exported, `foo` is not
+
+* Tools
+
+* The go tool
+
+The `go` tool is the de facto standard for building and installing Go code.
+
+Compile and run a single-file program:
+
+	$ go run hello.go
+
+Build and install the package in the current directory (and its dependencies):
+
+	$ go install
+
+Build and install the `fmt` package (and its dependencies):
+
+	$ go install fmt
+
+This tool also acts as an interface for most of the Go tools.
+
+* Import paths
+
+The `go` tool is a "zero configuration" tool. No Makefiles or scripts. Just Go code.
+Your build schema and code are always in sync; they are one and the same.
+
+Package import paths mirror the code's location in the file system:
+
+  src/
+    github.com/nf/
+      gosynth/
+        main.go
+        note.go
+        osc.go
+      wav/
+        writer.go
+
+The `gosynth` program imports the `wav` package:
+
+  import "github.com/nf/wav"
+
+Installing `gosynth` will automatically install the `wav` package:
+
+  $ go install github.com/nf/gosynth
+
+* Remote dependencies
+
+The `go` tool also fetches Go code from remote repositories.
+
+Import paths can be URLs:
+
+	import "code.google.com/p/go.net/websocket"
+
+To fetch, build and install a package:
+
+	$ go get code.google.com/p/go.net/websocket
+
+To fetch, build, and install `gosynth` and its dependencies:
+
+	$ go get github.com/nf/gosynth
+
+This simple design leads to other cool tools:
+
+.link http://go.pkgdoc.org
+
+* Godoc
+
+Godoc extracts documentation from Go code and presents it in a variety of forms.
+
+Comments need no special format, they just need to precede what they document.
+
+	// Split slices s into all substrings separated by sep and returns a slice of
+	// the substrings between those separators.
+	// If sep is empty, Split splits after each UTF-8 sequence.
+	// It is equivalent to SplitN with a count of -1.
+	func Split(s, sep string) []string {
+
+.image simple/split.png
+
+Documentation that lives with code is easy to keep up-to-date.
+
+* Gofmt
+
+The `gofmt` tool is a pretty-printer for Go source code.
+
+All Go code in the core is gofmt'd, as is ~70% of open source Go code.
+
+Ends boring formatting discussions.
+
+Improves readability. Improves writability.
+
+Saves a _huge_ amount of time.
+
+* Tests: writing
+
+The `go` tool and the `testing` package provide a lightweight test framework.
+
+.code simple/string_test.go /func TestIndex/,/^}/
+
+* Tests: running
+
+The go tool runs tests.
+
+	$ go test
+	PASS
+
+	$ go test -v
+	=== RUN TestIndex
+	--- PASS: TestIndex (0.00 seconds)
+	PASS
+
+To run the tests for all my projects:
+
+	$ go test github.com/nf/...
+
+* Tests: benchmarks
+
+The `testing` package also supports benchmarks.
+	
+A sample benchmark function:
+
+.code simple/string_test.go /func BenchmarkIndex/,/^}/
+ 
+The benchmark package will vary `b.N` until the benchmark function lasts long enough to be timed reliably.
+
+	$ go test -test.bench=Index
+	PASS
+	BenchmarkIndex	50000000	        37.3 ns/op
+
+* Tests: doc examples
+
+The `testing` package also supports testable examples.
+
+.code simple/string_test.go /func ExampleIndex/,/^}/
+
+Examples and built and run as part of the normal test suite:
+
+	$ go test -v
+	=== RUN: ExampleIndex
+	--- PASS: ExampleIndex (0.00 seconds)
+	PASS
+
+The example is displayed in `godoc` alongside the thing it demonstrates:
+
+.link http://golang.org/pkg/strings/#Index
+
+* And there's more
+
+- `vet`: checks code for common programmer mistakes
+- `pprof`: CPU and memory profiling
+- `fix`: automatically migrate code as APIs change
+- GDB support
+- Editor support: Vim, Emacs, Eclipse, Sublime Text
+
+* Some package examples
+
+
+* io
+
+The `io` package provides fundamental I/O interfaces that are used throughout most Go code.
+
+The most ubiquitous are the `Reader` and `Writer` types, which describe streams of data.
+
+.code simple/io.go
+
+`Reader` and `Writer` implementations include files, sockets, (de)compressors, image and JSON codecs, and many more.
+
+* net/http
+
+The `net/http` package implements an HTTP server and client.
+
+.play simple/hello-web.go
+
+* encoding/json
+
+The `encoding/json` package converts JSON-encoded data to and from native Go data structures.
+
+.play simple/json.go /const/,$
+
+* time
+
+The `time` package provides a representation of time and duration, and other time-related functions.
+
+.play simple/time.go /START/,/END/
+.play simple/time2.go /START/,/END/
+
+`time.Time` values also contain a `time.Location` (for display only):
+
+.play simple/time3.go /START/,/END/
+
+* flag
+
+The `flag` package provides a simple API for parsing command-line flags.
+
+.play simple/flag.go
+
+	$ flag -message 'Hold on...' -delay 5m
+
+
+* An example
+
+* Webfront
+
+`Webfront` is an HTTP server and reverse proxy.
+
+It reads a JSON-formatted rule file like this:
+
+.code simple/webfront/main.go /^\[/,/\]/
+
+For all requests to the host `example.com` (or any name ending in `".example.com"`) it serves files from the `/var/www` directory.
+
+For requests to `example.org`, it forwards the request to the HTTP server listening on localhost port 8080.
+
+* The Rule type
+
+A `Rule` value specifies what to do for a request to a specific host.
+
+.code simple/webfront/main.go /Rule represents/,/^}/
+
+It corresponds directly with the entries in the JSON configuration file.
+
+.code simple/webfront/main.go /^\[/,/\]/
+
+* Rule methods
+
+.code simple/webfront/main.go /Match returns/,/^}/
+.code simple/webfront/main.go /Handler returns/,/^}/
+
+* The Server type
+
+The `Server` type is responsible for loading (and refreshing) the rules from the rule file and serving HTTP requests with the appropriate handler.
+
+.code simple/webfront/main.go /Server implements/,/^}/
+.code simple/webfront/main.go /ServeHTTP matches/,/^}/
+
+* The handler method
+
+.code simple/webfront/main.go /handler returns/,/^}/
+
+* Parsing rules
+
+The `parseRules` function uses the `encoding/json` package to read the rule file into a Go data structure.
+
+.code simple/webfront/main.go /parseRules reads/,/^}/
+
+* The loadRules method
+
+.code simple/webfront/main.go /loadRules tests/,/^}/
+
+* Constructing the server
+
+.code simple/webfront/main.go /NewServer constructs/,/^}/
+
+This constructor function launches a goroutine running the `refreshRules` method.
+
+* Refreshing the rules
+
+.code simple/webfront/main.go /refreshRules polls/,/^}/
+
+* Bringing it all together
+
+The main function parses command-line flags, constructs a `Server`, and launches an HTTP server that serves all requests with the `Server`.
+
+.code simple/webfront/main.go /^var/,/^}/
+
+* Demo
+
+* Testing (1/3)
+
+The `Server` integration test uses the `httptest` package to construct a dummy HTTP server, synthesizes a set of rules, and constructs a `Server` instance that uses those rules.
+
+.code simple/webfront/server_test.go /^func testHandler/,/STOP/
+
+* Testing (2/3)
+
+Each test case in the table specifies a request URL and the expected response code and body.
+
+.code simple/webfront/server_test.go /TESTS START/,/STOP/
+
+* Testing (3/3)
+
+For each test case, construct an `http.Request` for the url and an `httptest.ResponseRecorder` to capture the response, and pass them to the `Server.ServeHTTP` method. Then check that the response matches the test case.
+
+.code simple/webfront/server_test.go /RANGE START/,/^}/
+
+* Demo
+
+* Conclusions
+
+* Further reading
+
+All about Go:
+
+.link http://golang.org
+
+The slides for this talk:
+
+.link http://talks.golang.org/2012/simple.slide
+
+webfront:
+
+.link https://github.com/nf/webfront
+
