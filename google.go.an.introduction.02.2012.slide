@@ -13,14 +13,11 @@ Google Go: an introduction to the language
 
 * Video
 
+These slides are based on a talk by Andrew Gerrand.
+
 A video of this talk was recorded at Øredev in Malmö, Sweden in November 2012.
 
 .link http://vimeo.com/53221558 Watch the talk on Vimeo
-
-Andrew Gerrand
-Google Inc.
-http://golang.org
-
 
 * Background
 
@@ -221,9 +218,11 @@ There are many:
 
 What I like:
 
-- .link http://code.google.com/p/goclipse/ goclipse for Eclipse
+- goclipse for Eclipse
+.link http://code.google.com/p/goclipse/
 
-- .link http://code.google.com/p/liteide/ liteide for debugging
+- liteide for debugging
+.link http://code.google.com/p/liteide/
 
 * An example
 
@@ -320,7 +319,7 @@ If not, call the `log.Fatal` function to print the error message and exit the pr
 * Hello World on the web: extensible types but no classes
 
 - *Struct* are value types, they get copied when passed along
-- These *struct-types* are *created* *but* *not* *initialized* with the _new_ keyword. Everything is zeroed.
+- These *struct-types* are *created* *but* *not* *initialized* with the _new_ keyword. Everything is zeroed
 - There are pointers for this reason
 
 * There are other types
