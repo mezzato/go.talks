@@ -35,6 +35,13 @@ Motivated by Google's needs:
 - Fast development cycle
 - No surprises
 
+* History
+
+- Project starts at Google in 2007 (by Griesemer, Pike, Thompson)
+- Open source release in November 2009
+- More than 250 contributors join the project
+- Version 1.0 release in March 2012
+
 * Design
 
 "Consensus drove the design. Nothing went into the language until [Ken Thompson, Robert Griesemer, and myself] all agreed that it was right. Some features didn’t get resolved until after a year or more of discussion." - Rob Pike
@@ -92,21 +99,6 @@ but:
 - no inheritance
 - no generics
 
-* Hello, go
-
-The command line 
-
-open a command, type:
-	
-	go build {file name}
-execute 
-	
-	./{file name}
-
-On these slides just in a window; edit if you like and click on *Run*
-
-.play simple/hello.go
-
 * The "functional" side
 
 - functions are first-class objects (closures etc.)
@@ -119,6 +111,108 @@ but:
 - much faster
 - the compiler makes things safer 
 
+
+* Getting started
+
+* Install Go
+
+.link http://golang.org/doc/install
+
+- Install from binary distributions or build from source
+- 32- and 64-bit x86 and ARM processors
+- Windows, Mac OS X, Linux, and FreeBSD
+- Other platforms may be supported by `gccgo`
+
+# Go is available in binary form for Windows, Mac OS X, Linux, and FreeBSD running under 32 and 64-bit x86 processor architectures. To install Go on these systems, download the appropriate file from golang.org and either open the package installer (Windows or OS X) or extract the archive to /usr/local/go (Linux and FreeBSD).  
+
+# If you use a different operating system or processor architecture, you may still be able to use Go by building it from source or using gccgo (an alternate Go compiler based on the GNU C Compiler). See the installation instructions on golang.org for how to do this.
+
+
+* The go tool
+
+The `go` tool is the standard tool for building, testing, and installing Go programs.
+
+Compile and run `hello.go`:
+
+  $ go run hello.go
+
+Run `zip` tests:
+
+  $ go test archive/zip
+
+Build and format the files in the current directory:
+
+  $ go build
+  $ go fmt
+
+Fetch and install `websocket`:
+
+  $ go get code.google.com/p/go.net/websocket 
+
+
+* Workspaces
+
+The `go` tool derives build instructions from Go source code.
+
+There's no need to write and maintain build scripts.
+
+For this to work, some prescribed directory structure, known as a workspace, is required.
+
+  workspace/
+    bin # executable binaries
+    pkg # compiled object files
+    src # source code
+
+* Create a workspace
+
+Create your workspace now.
+
+#I prefer to use the name "gocode", but you can use whatever you like.
+
+  $ mkdir -p $HOME/gocode/src
+
+(The `bin` and `pkg` sub-directories will be created by the `go` tool.)
+
+Tell the `go` tool where your workspace is by setting the `GOPATH` environment variable:
+# You can do this on OS X, Linux, and FreeBSD by adding this line to the `$HOME/.profile` and re-starting any running shells:
+
+  export GOPATH=$HOME/gocode
+
+# See the installation instructions at golang.org for how to set `GOPATH` under Windows.
+
+You may also want to add the `bin` sub-directory of your workspace to your `PATH`:
+
+  export PATH=$PATH:$GOPATH/bin
+
+This lets you run your Go programs without specifying their full path.
+
+(You may want to put these `export` commands in the `.bash_profile` file in your home directory.)
+
+* Choose a namespace
+
+Choose a special place for your Go code.
+
+I use `"github.com/mezzato"`, the root of my GitHub account (useful with `go get`).
+
+# Once you have chosen a namespace, create the required paths inside the `src` directory of your workspace:
+
+  $ mkdir -p $GOPATH/src/github.com/mezzato/go.talks/hello
+
+Create a `hello` directory in your namespace and copy `hello.go` there:
+  
+  $ mkdir $GOPATH/src/github.com/mezzato/go.talks/hello
+  $ cp hello.go $GOPATH/src/github.com/mezzato/go.talks/hello
+
+Now you can build install the hello program with the `go` tool:
+
+  $ go install github.com/mezzato/go.talks/hello
+
+This builds an executable named `hello`, and installs it to the `bin` directory of your workspace.
+
+  $ $GOPATH/bin/hello
+  Hello World
+
+
 * Before coding an IDE to make life easier
 
 There are many:
@@ -127,13 +221,21 @@ There are many:
 
 What I like:
 
-- [[http://code.google.com/p/goclipse/][goclipse for Eclipse]]
+- .link http://code.google.com/p/goclipse/ goclipse for Eclipse
 
-- [[http://code.google.com/p/liteide/][liteide for debugging]]
+- .link http://code.google.com/p/liteide/ liteide for debugging
 
-* Our example
+* An example
 
-* Our example
+* An example: the command line version
+
+Hello World
+
+.play simple/hello.go
+
+On these slides just in a window; edit if you like and click on *Run*
+
+* An example: the web version
 
 A command-line program that starts up a web site and writes "Hello World" when a GET request comes in.
 
@@ -150,11 +252,11 @@ This is where you will put your Go source files.
 
 * Hello, go on the web
 
-.code simple/hello-web.go
+.play simple/hello-web.go
 
 # There's a lot going on here, so let's break it down. 
 
-* Hello, go on the web: package statement
+* Hello World on the web: package statement
 
 All Go code belongs to a package.
 
@@ -162,8 +264,7 @@ All Go code belongs to a package.
 
 Go programs begin with function `main` inside package `main`.
 
-
-* Hello, go on the web: import statement
+* Hello World on the web: import statement
 
 The import declaration specifies the file's dependencies.
 
@@ -173,20 +274,20 @@ Each string is an import path. It tells the Go tools where to find the package.
 
 These packages are all from the Go standard library.
 
-* Hello, go on the web: the main function
+* Hello World on the web: the main function
 
 .code simple/hello-web.go /func.main/,/^}/ 
 
 The main function takes no arguments and has no return values.
 
-* Hello, go on the web: a custom type
+* Hello World on the web: a custom type
 
 .code simple/hello-web.go /type Greeting/ HLtype
 
 This is a type declaration. The type is the same as the string type 
 but is `renamed` to be extended with methods (called receivers).
 
-* Hello, go on the web: extending a type with methods and implementing interfaces for free
+* Hello World on the web: extending a type with methods and implementing interfaces for free
 
 .code simple/hello-web.go /type.Greeting./,/^}/ HLtype
 
@@ -200,7 +301,7 @@ which exposes just one method:
 		ServeHTTP(ResponseWriter, *Request)
 	}
 	
-* Hello, go on the web: error handling
+* Hello World on the web: error handling
 
 .code simple/hello-web.go /func.main/,/^}/ HLerr
 
@@ -212,15 +313,11 @@ If not, call the `log.Fatal` function to print the error message and exit the pr
 
 # I cannot overstate the importance of error checking. Disregard error values at your peril!
 	
-* Hello, go on the web: run it!
-
-.play simple/hello-web.go
-
-* Hello, go on the web: a struct now
+* Hello World on the web: a struct now
 
 .play simple/hello-web-struct.go
 
-* Hello, go on the web: extensible types but no classes
+* Hello World on the web: extensible types but no classes
 
 - *Struct* are value types, they get copied when passed along
 - These *struct-types* are *created* *but* *not* *initialized* with the _new_ keyword. Everything is zeroed.
@@ -243,20 +340,15 @@ They are the types:
 - orthogonality, one way of doing things
 - *concurrent*
 
-* When use Go? Still missing
+* Rob Pike, Go Concurrency Patterns
 
-- When should I consider using Go? 
+Video
 
-networking, 
-concurrency, 
-systems language, 
-speed, 
-multi-platform
+This talk was presented at Google I/O in June 2012.
 
-- It would be nice to see:
+.link http://www.youtube.com/watch?v=f6kdp27TYZs Watch the talk on YouTube
 
-a nice web framework
-a cross-platform desktop framework
+The following slides are an excerpt of the beginning.
 
 * Concurrency features in Go
 
@@ -441,6 +533,21 @@ We won't need them today.
 * The Go approach
 
 Don't communicate by sharing memory, share memory by communicating.
+
+* TO RECAP: When use Go? Still missing
+
+- When should I consider using Go? 
+
+networking, 
+concurrency, 
+systems language, 
+speed, 
+multi-platform
+
+- It would be nice to see:
+
+a nice web framework
+a cross-platform desktop framework
 
 * "Patterns"
 

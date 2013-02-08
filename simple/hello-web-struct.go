@@ -16,7 +16,7 @@ func (g *Greeting) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, m)
 }
 func main() {
-	var g *Greeting = &Greeting{Message: "Hello, go"} // or new(Greeting)...
+	var g *Greeting = &Greeting{Message: "Hello World"} // or new(Greeting)...
 	err := http.ListenAndServe("localhost:4000", g)
 	if err != nil {
 		log.Fatal(err)

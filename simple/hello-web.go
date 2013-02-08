@@ -13,7 +13,7 @@ func (g Greeting) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	err := http.ListenAndServe("localhost:4000", Greeting("Hello, go"))
+	err := http.ListenAndServe("localhost:4000", Greeting("Hello World"))
 	if err != nil {
 		log.Fatal(err)
 	}
