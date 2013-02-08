@@ -231,12 +231,9 @@ If not, call the `log.Fatal` function to print the error message and exit the pr
 There are *other* *types* which are *automatically* *"referenced"*, memory is allocated with _make_ in this case. 
 The variable is initialized as well in this case. 
 
-They are the types: 
-
-*slice* (~ArrayList)
-
-*map* (~HashMap)
-
+They are the types:
+*slice* (~ ArrayList)
+*map* (~ HashMap)
 *channel* (this is new)
 
 * Abount channels... the modern (or at least recycled) side
