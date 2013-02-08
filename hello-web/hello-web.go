@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-type Greeting string // HLtype
+type Greeting string
 
 func (g Greeting) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, g)
