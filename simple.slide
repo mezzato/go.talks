@@ -46,7 +46,7 @@ Go is:
 - Concurrent, in a way that keeps you sane
 - Designed for working programmers
 
-* The web is best up-to-date reference
+* The web is the best up-to-date reference
 
 web site: 
 
@@ -78,10 +78,6 @@ The guarantee: code written for Go 1.0 will build and run with Go 1.x.
 
 .image simple/gopher.jpg
 
-* Hello, go
-
-.play simple/hello.go
-
 * Go is a trade-off between dynamically and statically-typed languages
 
 * The "Java-like" side
@@ -96,6 +92,21 @@ but:
 - no inheritance
 - no generics
 
+* Hello, go
+
+The command line 
+
+open a command, type:
+	
+	go build {file name}
+execute 
+	
+	./{file name}
+
+On these slides just in a window; edit if you like and click on *Run*
+
+.play simple/hello.go
+
 * The "functional" side
 
 - functions are first-class objects (closures etc.)
@@ -108,74 +119,90 @@ but:
 - much faster
 - the compiler makes things safer 
 
-* Our project
+* Before coding an IDE to make life easier
 
-* Our project
+There are many:
 
-A command-line program that fetches and displays the latest headlines from the `golang` page on Reddit.
-# (Reddit is a huge link aggregation site where people submit links and other people vote on and have discussions about them.)
+.link http://geekmonkey.org/articles/20-comparison-of-ides-for-google-go
+
+What I like:
+
+- [[http://code.google.com/p/goclipse/][goclipse for Eclipse]]
+
+- [[http://code.google.com/p/liteide/][liteide for debugging]]
+
+* Our example
+
+* Our example
+
+A command-line program that starts up a web site and writes "Hello World" when a GET request comes in.
 
 The program will:
-- make an HTTP request to the Reddit API,
-- decode the JSON response into a Go data structure, and
-- print each link's title, URL, and number of comments.
 
-To get started, create directory inside your namespace called `reddit`:
+- start up a web site
+- reply with the HTTP body "Hello World"
 
-  $ mkdir $GOPATH/src/github.com/nf/reddit
+To get started, create directory inside your namespace called `hello-web`:
+
+  $ mkdir $GOPATH/src/github.com/mezzato/go.talks/hello-web
   
 This is where you will put your Go source files.
 
+* Hello, go on the web
 
-* Make an HTTP request
-
-This program makes an HTTP request to the Reddit API and copies its response to standard output.  Put this in a file named `main.go` inside your `reddit` directory.
-
-.code simple/1get.go
-
-# If you run it you should see a blob of JSON data, or an error message if something goes wrong.
+.code simple/hello-web.go
 
 # There's a lot going on here, so let's break it down. 
 
-
-* Make an HTTP request: package statement
+* Hello, go on the web: package statement
 
 All Go code belongs to a package.
 
-.code simple/1get.go /package/
+.code simple/hello-web.go /package/
 
 Go programs begin with function `main` inside package `main`.
 
 
-* Make an HTTP request: import statement
+* Hello, go on the web: import statement
 
 The import declaration specifies the file's dependencies.
 
-.code simple/1get.go /import/,/\)/
+.code simple/hello-web.go /import/,/\)/
 
 Each string is an import path. It tells the Go tools where to find the package.
 
 These packages are all from the Go standard library.
 
+* Hello, go on the web: the main function
 
-* Make an HTTP request: function declaration
+.code simple/hello-web.go /func.main/,/^}/ 
 
-.code simple/1get.go /func.main/,/^}/ HLfunc
+The main function takes no arguments and has no return values.
 
-This is a function declaration. The main function takes no arguments and has no return values.
+* Hello, go on the web: a custom type
 
-* Make an HTTP request: http.Get
+.code simple/hello-web.go /type Greeting/ HLtype
 
-.code simple/1get.go /func.main/,/^}/ HLget
+This is a type declaration. The type is the same as the string type 
+but is `renamed` to be extended with methods (called receivers).
 
-Call the `Get` function from the `http` package, passing the URL of the Reddit API as its only argument.
+* Hello, go on the web: extending a type with methods and implementing interfaces for free
 
-Declare two variables (`resp` and `err`) and give them the return values of the function call. (Yes, Go functions can return multiple values.) The `Get` function returns `*http.Response` and an `error` values.
+.code simple/hello-web.go /type.Greeting./,/^}/ HLtype
 
+- The method is attached to the type `Greeting`
+- This is why we had to call the new string type `Greeting` other than `string`
+- The compiler recognizes that the type implements the interface *http.Handler*:
+	
+which exposes just one method:
 
-* Make an HTTP request: error handling
+	type Handler interface {
+		ServeHTTP(ResponseWriter, *Request)
+	}
+	
+* Hello, go on the web: error handling
 
-.code simple/1get.go /func.main/,/^}/ HLerr
+.code simple/hello-web.go /func.main/,/^}/ HLerr
 
 Compare `err` against `nil`, the zero-value for the built-in `error` type.
 
@@ -184,196 +211,268 @@ The `err` variable will be nil if the request was successful.
 If not, call the `log.Fatal` function to print the error message and exit the program.
 
 # I cannot overstate the importance of error checking. Disregard error values at your peril!
+	
+* Hello, go on the web: run it!
 
+.play simple/hello-web.go
 
-* Make an HTTP request: check status
+* Hello, go on the web: a struct now
 
-.code simple/1get.go /func.main/,/^}/ HLstatus
+.play simple/hello-web-struct.go
 
-Test that the HTTP server returned a "200 OK" response.
+* Hello, go on the web: extensible types but no classes
 
-If not, bail, printing the HTTP status message ("500 Internal Server Error", for example).
+- *Struct* are value types, they get copied when passed along
+- These *struct-types* are *created* *but* *not* *initialized* with the _new_ keyword. Everything is zeroed.
+- There are pointers for this reason
 
+* There are other types
 
-* Make an HTTP request: copy
+There are *other* *types* which are *automatically* *"referenced"*, memory is allocated with _make_ in this case. 
+The variable is initialized as well in this case. 
 
-.code simple/1get.go /func.main/,/^}/ HLcopy
+They are the types: 
 
-Use `io.Copy` to copy the HTTP response body  to standard output (`os.Stdout`).
+*slice* (~ArrayList)
 
-#On the left is a variable assignment that stores the error return value of the Copy in err. Note that this is different to the previous assignment which was also a declaration. This simple assignment - distinguished by the absence of a colon - assigns the second return value of the Copy to the err variable. The first return value, which appears to be assigned to an underscore, is thrown away. The underscore can be thought of as a "write only variable".
+*map* (~HashMap)
 
-  package io
+*channel* (this is new)
 
-  func Copy(dst Writer, src Reader) (written int64, err error)
-
-The `resp.Body` type implements `io.Reader` and `os.Stdout` implements `io.Writer`.
-
-* Test it
-
-.play simple/1get.go
-
-
-* Decoding the JSON response
-
-* Data structures
-
-The Reddit API returns JSON data like this:
-
-  {"data": {"children": [
-    {"data": {
-      "title": "The Go homepage",
-      "url": "http://golang.org/",
-      ...
-    }},
-    ...
-  ]}}
-
-Go's `json` package decodes JSON-encoded data into native Go data structures. To decode the API response, declare some types that reflect the structure of the JSON data:
-
-.code simple/2json.go /type.Item/,/^}/
-
-
-* Decode the response
-
-Instead of copying the HTTP response body to standard output
-
-.code simple/1get.go /io.Copy/
-
-we use the json package to decode the response into our Response data structure.
-
-.code simple/2json.go /new.Response/,/json.NewDecoder/
-
-Initialize a new `Response` value, store a pointer to it in the new variable `r`.
-
-Create a new `json.Decoder` object and decode the response body into `r`.
-
-As the decoder parses the JSON data it looks for corresponding fields of the same names in the `Response` struct. The `"data"` field of the top-level JSON object is decoded into the `Response` struct's `Data` field, and JSON array `"children"` is decoded into the `Children` slice, and so on.
-
-
-* Print the data
-
-    for _, child := range r.Data.Children {
-      fmt.Println(child.Data.Title)
-    }
-
-Iterate over the `Children` slice, assigning the slice value to `child` on each iteration.
-
-The `Println` call prints the item's `Title` followed by a newline.
-
-
-* Tidying up
-
-* Separation of concerns
-
-So far, all the action happens in the main function.
-
-As the program grows, structure and modularity become important.
-
-What if we want to check several subreddits? Or share this functionality with another program?
-
-Create a function named `Get` that takes the name of subreddit, makes the API call, and returns the items from that subreddit.
-
-.code simple/3func.go /func.Get/
-
-`Get` takes a string, `reddit`, and returns a slice of `Item` and an `error` value.
-
-* Get: construct the URL
-
-.code simple/3func.go /func.Get/,/^}/ HLurl
-
-Use `fmt.Sprintf` to construct the request URL from the provided `reddit` string.
-
-* Get: return
-
-.code simple/3func.go /func.Get/,/^}/ HLreturn
-
-Exiting the function, return a nil slice and a non-nil error value, or vice versa.
-
-* Get: making an error
-
-.code simple/3func.go /func.Get/,/^}/ HLerrors
-
-The response's `Status` field is just a string; use the `errors.New` function to convert it to an `error` value.
-
-* Get: defer clean-up work
-
-.code simple/3func.go /func.Get/,/^}/ HLclose
-
-Defer a call to the response body's `Close` method, to guarantee that we clean up after the HTTP request. The call will be executed after the function returns.
-
-# It's important to Close the response Body, because it tells the http package that you have finished reading, freeing up the HTTP connection to for re-used (the Go http package uses Keep-Alive and connection pooling by default). If we want to use our Get function in the context of a larger program, it must clean up properly.
-
-# TODO(adg): about defer
-
-* Get: prepare the response
-
-.code simple/3func.go /func.Get/,/^}/ HLprepare
-
-Use the make function to allocate an `Item` slice big enough to store the response data.
-
-* Get: convert the response
-
-.code simple/3func.go /func.Get/,/^}/ HLconvert
-
-Iterate over the response's `Children` slice, assigning each child's `Data` element to the corresponding element in the items slice.
-
-* Use Get in main
-
-In the `main` function, replace the http request and JSON decoding code with a single call to `Get`.
-
-.code simple/3func.go /func.main/,/^}/
-
-The print loop becomes clearer, too.
-
-However, it's not very useful to print only the title of the items. Let's address that.
-
-
-* Formatted output
-
-* The Stringer interface
-
-The `fmt` package knows how to format the built-in types, but it can be told how to format user-defined types, too.
-
-When you pass a value to the `fmt.Print` functions, it checks to see if it implements the `fmt.Stringer` interface:
-
-  type Stringer interface {
-    String() string
-  }
-
-Any type that implements a `String() string` method is a `Stringer`, and the `fmt` package will use that method to format values of that type.
-
-
-* Formatting Items
-
-A method declaration is just like a function declaration, but the receiver comes first.
-
-Here's a `String` method for the `Item` type that returns the title, a newline, and the URL:
-
-  func (i Item) String() string {
-    return fmt.Sprintf("%s\n%s", i.Title, i.URL)
-  }
-
-To print the item we just pass it to Println, which uses the provided `String` method to format the `Item`.
-
-  fmt.Println(item)
-  
-* Test it
-
-.play simple/4method.go /func.main/,/^}/
-
-* The modern side
+* Abount channels... the modern (or at least recycled) side
 
 - cross-platform
 - modern functionality (networking, websockets, JSON e.g.)
 - orthogonality, one way of doing things
-- _concurrent_
+- *concurrent*
 
-* Still missing
+* When use Go? Still missing
 
-- a nice web framework
+- When should I consider using Go? 
 
-- a cross-platform desktop framework
+networking, 
+concurrency, 
+systems language, 
+speed, 
+multi-platform
+
+- It would be nice to see:
+
+a nice web framework
+a cross-platform desktop framework
+
+* Concurrency features in Go
+
+People seemed fascinated by the concurrency features of Go when the language was first announced.
+
+Questions:
+
+- Why is concurrency supported?
+- What is concurrency, anyway?
+- Where does the idea come from?
+- What is it good for?
+- How do I use it?
+
+* Why?
+
+Look around you. What do you see?
+
+Do you see a single-stepping world doing one thing at a time?
+
+Or do you see a complex world of interacting, independently behaving pieces?
+
+That's why. Sequential processing on its own does not model the world's behavior.
+
+* What is concurrency?
+
+Concurrency is the composition of independently executing computations.
+
+Concurrency is a way to structure software, particularly as a way to write clean code that interacts well with the real world.
+
+It is not parallelism.
+
+* Concurrency is not parallelism
+
+Concurrency is not parallelism, although it enables parallelism.
+
+If you have only one processor, your program can still be concurrent  but it cannot be parallel.
+
+On the other hand, a well-written concurrent program might run efficiently in parallel on a multiprocessor. That property could be important...
+
+For more on that distinction, see the link below. Too much to discuss here.
+
+.link http://golang.org/s/concurrency-is-not-parallelism
+
+* A model for software construction
+
+Easy to understand.
+
+Easy to use.
+
+Easy to reason about.
+
+You don't need to be an expert!
+
+(Much nicer than dealing with the minutiae of parallelism (threads, semaphores, locks, barriers, etc.))
+
+* History
+
+To many, the concurrency features of Go seemed new.
+
+But they are rooted in a long history, reaching back to Hoare's CSP in 1978 and even Dijkstra's guarded commands (1975).
+
+Languages with similar features:
+
+- Occam (May, 1983)
+- Erlang (Armstrong, 1986)
+- Newsqueak (Pike, 1988)
+- Concurrent ML (Reppy, 1993)
+- Alef (Winterbottom, 1995)
+- Limbo (Dorward, Pike, Winterbottom, 1996).
+
+* Distinction
+
+Go is the latest on the Newsqueak-Alef-Limbo branch, distinguished by first-class channels.
+
+Erlang is closer to the original CSP, where you communicate to a process by name rather than over a channel.
+
+The models are equivalent but express things differently.
+
+Rough analogy: writing to a file by name (process, Erlang) vs. writing to a file descriptor (channel, Go).
+
+* Basic Examples
+
+* A boring function
+
+We need an example to show the interesting properties of the concurrency primitives.
+
+To avoid distraction, we make it a boring example.
+
+.play concurrency/support/boring.go /START/,/STOP.*/
+
+* Slightly less boring
+
+Make the intervals between messages unpredictable (still under a second).
+
+.play concurrency/support/lessboring.go /START/,/STOP/
+
+* Running it
+
+The boring function runs on forever, like a boring party guest.
+
+.play concurrency/support/lessboring.go /^func.main/,$
+
+* Ignoring it
+
+The go statement runs the function as usual, but doesn't make the caller wait.
+
+It launches a goroutine.
+
+The functionality is analogous to the & on the end of a shell command.
+
+.play concurrency/support/goboring.go 1,/^}/
+
+* Ignoring it a little less
+
+When main returns, the program exits and takes the boring function down with it.
+
+We can hang around a little, and on the way show that both main and the launched goroutine are running.
+
+.play concurrency/support/waitgoboring.go /func.main/,/^}/
+
+* Goroutines
+
+What is a goroutine? It's an independently executing function, launched by a go statement.
+
+It has its own call stack, which grows and shrinks as required.
+
+It's very cheap. It's practical to have thousands, even hundreds of thousands of goroutines.
+
+It's not a thread.
+
+There might be only one thread in a program with thousands of goroutines.
+
+Instead, goroutines are multiplexed dynamically onto threads as needed to keep all the goroutines running.
+
+But if you think of it as a very cheap thread, you won't be far off.
+
+* Communication
+
+Our boring examples cheated: the main function couldn't see the output from the other goroutine.
+
+It was just printed to the screen, where we pretended we saw a conversation.
+
+Real conversations require communication.
+
+* Channels
+
+A channel in Go provides a connection between two goroutines, allowing them to communicate.
+
+.code concurrency/support/helpers.go /START1/,/STOP1/
+.code concurrency/support/helpers.go /START2/,/STOP2/
+.code concurrency/support/helpers.go /START3/,/STOP3/
+
+* Using channels
+
+A channel connects the main and boring goroutines so they can communicate.
+
+.play concurrency/support/changoboring.go /START1/,/STOP1/
+.code concurrency/support/changoboring.go /START2/,/STOP2/
+
+* Synchronization
+
+When the main function executes <–c, it will wait for a value to be sent.
+
+Similarly, when the boring function executes c <– value, it waits for a receiver to be ready.
+
+A sender and receiver must both be ready to play their part in the communication. Otherwise we wait until they are.
+
+Thus channels both communicate and synchronize.
+
+* An aside about buffered channels
+
+Note for experts: Go channels can also be created with a buffer.
+
+Buffering removes synchronization.
+
+Buffering makes them more like Erlang's mailboxes.
+
+Buffered channels can be important for some problems but they are more subtle to reason about.
+
+We won't need them today.
+
+* The Go approach
+
+Don't communicate by sharing memory, share memory by communicating.
+
+* "Patterns"
+
+* Generator: function that returns a channel
+
+Channels are first-class values, just like strings or integers.
+
+.play concurrency/support/generatorboring.go /START1/,/STOP1/
+.code concurrency/support/generatorboring.go /START2/,/STOP2/
+
+* Channels as a handle on a service
+
+Our boring function returns a channel that lets us communicate with the boring service it provides.
+
+We can have more instances of the service.
+
+.play concurrency/support/generator2boring.go /START1/,/STOP1/
+
+* Multiplexing
+
+These programs make Joe and Ann count in lockstep.
+We can instead use a fan-in function to let whosoever is ready talk.
+
+.code concurrency/support/faninboring.go /START3/,/STOP3/
+.play concurrency/support/faninboring.go /START1/,/STOP1/
+
+* Fan-in
+
+.image concurrency/images/gophermegaphones.jpg
 
 * Standard library
 
@@ -681,11 +780,4 @@ All about Go:
 
 .link http://golang.org
 
-The slides for this talk:
-
-.link http://talks.golang.org/2012/simple.slide
-
-webfront:
-
-.link https://github.com/nf/webfront
 
