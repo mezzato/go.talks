@@ -5,14 +5,20 @@ import (
 	"log"
 	"net/http"
 )
+
+// START OMIT
+
+// package and import statements here...
+
 type Greeting struct {
 	Message string
 	Count   int
 }
+
 func (g *Greeting) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	g.Count++
 	m := fmt.Sprintf("%s. Fired %d times.", g.Message, g.Count) // or var m string = ...
-	//fmt.Printf("Full url: %s\n", r.URL)
+	//fmt.Printf("Path: %s\n", r.URL.Path)
 	fmt.Fprint(w, m)
 }
 func main() {
@@ -22,3 +28,5 @@ func main() {
 		log.Fatal(err)
 	}
 }
+
+// END OMIT
