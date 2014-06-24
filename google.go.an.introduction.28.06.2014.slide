@@ -351,6 +351,8 @@ returns an initialized (not zeroed) value of type T (not *T)
 
 * Interfaces are inferred by the compiler, no explicit "implements"
 
+.play -numbers simple/interfaces.go /START OMIT/,/END OMIT/
+
 * Rob Pike, Go Concurrency Patterns
 
 Video
@@ -545,20 +547,34 @@ We won't need them today.
 
 Don't communicate by sharing memory, share memory by communicating.
 
-* TO RECAP: When use Go? Still missing
-
-- When should I consider using Go? 
+* TO RECAP: when use Go?
 
 networking, 
 concurrency, 
-systems language, 
+systems language (I used it in place of Python), 
 speed, 
 multi-platform
 
-- It would be nice to see:
+--------------------
+*There* *is* *more:*
 
-a nice web framework
-a cross-platform desktop framework
+reflection
+C, C++ imports
+testing
+benchmarking and profiling
+live debug memory dumps over HTTP
+go fmt, go vet, go race detector...
+
+* My experience
+
+- open source: ftp4go FTP client, goconvert command line image conversion tool
+- network service to handle a queue of prioritized messages
+- HTTP reverse proxy (~ nginx) using Revel framework: [[http://revel.github.io/]]
+- Home automation system: Arduino, Raspberry Pi (Go web server on ARM), MQTT libraries in Go
+
+.image concurrency/images/homeautomation.jpg _ 500
+
+* That's probably plenty for now... Bye
 
 * "Patterns"
 
