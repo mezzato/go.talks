@@ -12,7 +12,7 @@ Open a command prompt in the directory where is repository has been checked out 
 
 Open a browser at the specified address and choose the slide file. Normally:
 
-    [http://127.0.0.1:3999]{http://127.0.0.1:3999}
+    http://127.0.0.1:3999
 
 ## Source code ##
 
