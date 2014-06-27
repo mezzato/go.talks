@@ -574,6 +574,16 @@ go fmt, go vet, go race detector...
 
 .image concurrency/images/homeautomation.jpg _ 500
 
+* Some links and projects
+
+- App Engine
+- YouTube Vitess: [[https://github.com/youtube/vitess]]
+- Heroku ([[https://www.heroku.com/]]) with doozerd: [[https://github.com/ha/doozerd]]
+- skynetservices: [[https://github.com/skynetservices]]
+- camlistore: [[https://camlistore.org/]]
+- godep (Go dependecies): [[https://github.com/tools/godep]]
+
+
 * That's probably plenty for now... Bye
 
 * "Patterns"
