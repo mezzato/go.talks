@@ -6,7 +6,10 @@ Install Go and then the Go present tool:
     
 ## Slides ##
 
-Open a command prompt in the directory where is repository has been checked out and launch the present tool.  
+Open a command prompt in the directory where is repository has been checked out and launch the present tool:
+
+    present
+
 Open a browser at the specified address and choose the slide file. 
 
 ## Source code ##
