@@ -568,17 +568,21 @@ go fmt, go vet, go race detector...
 * My experience
 
 - open source: ftp4go FTP client, goconvert command line image conversion tool
-- network service to handle a queue of prioritized messages
+- network service to handle a queue of prioritized messages, live profiling: [[http://blog.golang.org/profiling-go-programs]]
 - HTTP reverse proxy (~ nginx) using Revel framework: [[http://revel.github.io/]]
 - Home automation system: Arduino, Raspberry Pi (Go web server on ARM), MQTT libraries in Go
 
 .image concurrency/images/homeautomation.jpg _ 500
 
-* Some links and projects
-
-- Go by Exmaple: [[https://gobyexample.com/]]
+* Some links
+- Go by Example: [[https://gobyexample.com/]]
 - Go projects: [[https://code.google.com/p/go-wiki/wiki/Projects]]
-- App Engine
+- Concurrency: [[http://blog.golang.org/advanced-go-concurrency-patterns]]
+- Profiling: [[http://blog.golang.org/profiling-go-programs]]
+
+*Some* *projects*
+
+- App Engine: [[https://cloud.google.com/developers/]]
 - YouTube Vitess: [[https://github.com/youtube/vitess]]
 - Heroku ([[https://www.heroku.com/]]) with doozerd: [[https://github.com/ha/doozerd]]
 - skynetservices: [[https://github.com/skynetservices]]
