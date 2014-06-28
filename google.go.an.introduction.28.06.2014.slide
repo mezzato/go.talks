@@ -576,6 +576,8 @@ go fmt, go vet, go race detector...
 
 * Some links and projects
 
+- Go by Exmaple: [[https://gobyexample.com/]]
+- Go projects: [[https://code.google.com/p/go-wiki/wiki/Projects]]
 - App Engine
 - YouTube Vitess: [[https://github.com/youtube/vitess]]
 - Heroku ([[https://www.heroku.com/]]) with doozerd: [[https://github.com/ha/doozerd]]
