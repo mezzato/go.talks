@@ -10,6 +10,8 @@ Make sure $GOPATH\bin is added to your PATH environment variable.
 
 Open a command prompt in the directory where the repository has been checked out and launch the present tool:
 
+    cd $GOPATH/src/github.com/mezzato/go.talks
+
     present
 
 Open a browser at the specified address and choose the slide file. Normally:
