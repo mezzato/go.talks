@@ -6,7 +6,7 @@ Install Go and then the Go present tool:
     
 ## Slides ##
 
-Make sure $GOPATH\bin is added to your PATH environment variable.
+Make sure $GOPATH/bin is added to your PATH environment variable.
 
 Open a command prompt in the directory where the repository has been checked out and launch the present tool:
 
