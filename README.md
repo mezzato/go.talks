@@ -8,7 +8,7 @@ Install Go and then the Go present tool:
 
 Make sure $GOPATH\bin is added to your PATH environment variable.
 
-Open a command prompt in the directory where is repository has been checked out and launch the present tool:
+Open a command prompt in the directory where the repository has been checked out and launch the present tool:
 
     present
 
