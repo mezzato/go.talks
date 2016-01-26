@@ -1,0 +1,955 @@
+Google Go: an introduction to the language
+
+26 Jan 2016
+
+# Go is a general-purpose language that bridges the gap between efficient
+# statically typed languages and productive dynamic language. But it’s not just
+# the language that makes Go special – Go has broad and consistent standard
+# libraries and powerful but simple tools.
+# 
+# This talk gives an introduction to Go, followed by a tour of some real
+# programs that demonstrate the power, scope, and simplicity of the Go
+# programming environment.
+
+* Video
+
+These slides are based on a talk by Andrew Gerrand.
+
+A video of this talk was recorded at Øredev in Malmö, Sweden in November 2012.
+
+.link http://vimeo.com/53221558 Watch the talk on Vimeo
+
+Many slides are excerpts of the various "official" Go talks:
+
+.link http://talks.golang.org/
+
+* Background
+
+* Why a new language?
+
+Go is designed for building production systems at Google.
+
+- Goal: make that job easier, faster, better. 
+Concurrency, Scalability, Fast development cycle, No surprises
+
+- Non-goal: break new ground in programming language research
+
+Plenty of research questions about how to implement Go well.
+
+Concurrency
+Polymorphism
+Garbage collection
+Program translation
+
+
+* History
+
+- Project starts at Google in 2007 (by Pike [Plan-9, UTF-8, Unix], Thompson [Unix founder], Griesemer [V8 JS engine, Java Hotspot VM])
+- Open source release in November 2009
+- More than 250 contributors join the project
+- Version 1.0 release in March 2012, Go 1.3 released on 18 June 2014
+
+Go 1.0: 
+A specification of the language and libraries that will be supported for years.
+The guarantee: code written for Go 1.0 will build and run with Go 1.x.
+
+"Best thing we ever did."
+
+* Design
+
+"Consensus drove the design. Nothing went into the language until [Ken Thompson, Robert Griesemer, and myself] all agreed that it was right. Some features didn’t get resolved until after a year or more of discussion." - Rob Pike
+
+# Go is:
+
+# - Lightweight, avoids unnecessary repetition
+# - Object Oriented, but not in the usual way
+# - Concurrent, in a way that keeps you sane
+# - Designed for working programmers
+
+* Why should I use go?
+
+- Simplicty: which is complicated. There is one single way of doing things: [[https://www.youtube.com/watch?v=rFejpH_tAHM]]
+
+- Builds on all major operating systems (Windows, Linux, OS X, FreeBSD, Android)
+
+- No dlls etc. one single executable to copy and paste
+
+- lightweight, 20MB of RAM typically
+
+- runs fast: [[http://www.techempower.com/benchmarks/]]
+
+- compiles fast
+
+- good community code (Docker, etc.)
+
+- libraries are up-to-date and in the language (http/2)
+
+- stable: versions 1.* are fully compatible, no rewriting
+
+* The web is the best up-to-date reference
+
+- *Web* *site*: [[http://golang.org/]]
+	
+- have a look at the *documentation*: [[http://golang.org/doc/]]
+	
+- browse through the *packages* to get a feel: [[http://golang.org/pkg/]]
+	
+- Go *projects*: [[https://code.google.com/p/go-wiki/wiki/Projects]]
+
+Some benchmarks:
+
+.link http://www.techempower.com/benchmarks/
+
+* Go is statically-typed with some flexibility from dynamically-typed languages
+
+* The "Java-like" side
+
+- compiled
+- runtime and garbage collector
+
+but: 
+
+- no runtime installation or byte-code
+- no classes 
+- no inheritance
+- no generics
+
+* The "dynamic" and functional side
+
+*BUT* *STATICALLY* *COMPILED*
+
+- functions are first-class objects (closures etc.)
+- interfaces are inferred by the compiler and never explicit
+- simple and intuitive APIs
+- compilation units and fast parsing
+
+but:
+
+- much faster
+- the compiler makes things safer 
+
+
+* Getting started
+
+* Install Go
+
+.link http://golang.org/doc/install
+
+- Install from binary distributions or build from source
+- processors: 32- and 64-bit x86 and ARM
+- systems: Linux, Mac OS X, Windows, FreeBSD, OpenBSD, Plan 9, Solaris, Native Client (NaCl)
+- Other platforms may be supported by `gccgo`
+
+# Go is available in binary form for Windows, Mac OS X, Linux, and FreeBSD running under 32 and 64-bit x86 processor architectures. To install Go on these systems, download the appropriate file from golang.org and either open the package installer (Windows or OS X) or extract the archive to /usr/local/go (Linux and FreeBSD).  
+
+# If you use a different operating system or processor architecture, you may still be able to use Go by building it from source or using gccgo (an alternate Go compiler based on the GNU C Compiler). See the installation instructions on golang.org for how to do this.
+
+
+* The go tool
+
+The `go` tool is the standard tool for building, testing, and installing Go programs.
+
+Compile and run `hello.go`:
+
+  $ go run hello.go
+
+Run `zip` tests:
+
+  $ go test archive/zip
+
+Build and format the files in the current directory:
+
+  $ go build
+  $ go fmt
+
+Fetch and install `websocket`:
+
+  $ go get code.google.com/p/go.net/websocket 
+
+
+* Workspaces
+
+The `go` tool derives build instructions from Go source code.
+
+There's no need to write and maintain build scripts.
+
+For this to work, some prescribed directory structure, known as a workspace, is required.
+
+  workspace/
+    bin # executable binaries
+    pkg # compiled object files
+    src # source code
+
+* Create a workspace
+
+Create your workspace now.
+
+#I prefer to use the name "gocode", but you can use whatever you like.
+
+  $ mkdir -p $HOME/gocode/src
+
+(The `bin` and `pkg` sub-directories will be created by the `go` tool.)
+
+Tell the `go` tool where your workspace is by setting the `GOPATH` environment variable:
+# You can do this on OS X, Linux, and FreeBSD by adding this line to the `$HOME/.profile` and re-starting any running shells:
+
+  export GOPATH=$HOME/gocode
+
+# See the installation instructions at golang.org for how to set `GOPATH` under Windows.
+
+You may also want to add the `bin` sub-directory of your workspace to your `PATH`:
+
+  export PATH=$PATH:$GOPATH/bin
+
+This lets you run your Go programs without specifying their full path.
+
+(You may want to put these `export` commands in the `.bash_profile` file in your home directory.)
+
+* Choose a namespace
+
+Choose a special place for your Go code.
+
+I use `"github.com/mezzato"`, the root of my GitHub account (useful with `go` `get`).
+
+# Once you have chosen a namespace, create the required paths inside the `src` directory of your workspace:
+
+  $ mkdir -p $GOPATH/src/github.com/mezzato/go.talks/hello
+
+Create a `hello` directory in your namespace and copy `hello.go` there:
+  
+  $ mkdir $GOPATH/src/github.com/mezzato/go.talks/hello
+  $ cp hello.go $GOPATH/src/github.com/mezzato/go.talks/hello
+
+Now you can build install the hello program with the `go` tool:
+
+  $ go install github.com/mezzato/go.talks/hello
+
+This builds an executable named `hello`, and installs it to the `bin` directory of your workspace.
+
+  $ $GOPATH/bin/hello
+  Hello World
+
+
+* Before coding an IDE to make life easier
+
+There are many:
+
+.link https://code.google.com/p/go-wiki/wiki/IDEsAndTextEditorPlugins
+
+What I like:
+
+- GoSublime for Sublime Text
+.link https://github.com/DisposaBoy/GoSublime
+
+- goclipse for Eclipse
+.link https://github.com/GoClipse/goclipse
+
+- liteide for debugging
+.link https://github.com/visualfc/liteide
+
+* An example
+
+* An example: the command line version
+
+Hello World
+
+.play simple/hello.go
+
+On these slides just in a window; edit if you like and click on *Run*
+
+* An example: the Web version
+
+A command-line program that starts up a web site and writes "Hello World" when a GET request comes in.
+
+The program will:
+
+- start up a web site
+- reply with the HTTP body "Hello World"
+
+To get started, create directory inside your namespace called `hello-web`:
+
+  $ mkdir $GOPATH/src/github.com/mezzato/go.talks/hello-web
+  
+This is where you will put your Go source files.
+
+* Hello, go on the Web
+
+.play simple/hello-web.go
+
+# There's a lot going on here, so let's break it down. 
+
+* Hello World on the Web: package statement
+
+All Go code belongs to a package.
+
+.code simple/hello-web.go /package/
+
+Go programs begin with function `main` inside package `main`.
+
+* Hello World on the Web: import statement
+
+The import declaration specifies the file's dependencies.
+
+.code simple/hello-web.go /import/,/\)/
+
+Each string is an import path. It tells the Go tools where to find the package.
+
+These packages are all from the Go standard library.
+
+* Hello World on the web: the main function
+
+.code simple/hello-web.go /func.main/,/^}/ 
+
+The main function takes no arguments and has no return values.
+
+* Hello World on the web: a custom type
+
+.code simple/hello-web.go /type Greeting/ HLtype
+
+This is a type declaration. The type is the same as the string type 
+but is `renamed` to be extended with methods (called receivers).
+
+* Hello World on the web: extending a type with methods and implementing interfaces for free
+
+.code simple/hello-web.go /type.Greeting./,/^}/ HLtype
+
+- The method is attached to the type `Greeting`
+- This is why we had to call the new string type `Greeting` other than `string`
+- The compiler recognizes that the type implements the interface *http.Handler*:
+	
+which exposes just one method:
+
+	type Handler interface {
+		ServeHTTP(ResponseWriter, *Request)
+	}
+	
+* Hello World on the web: error handling
+
+.code simple/hello-web.go /func.main/,/^}/ HLerr
+
+Compare `err` against `nil`, the zero-value for the built-in `error` type.
+
+The `err` variable will be nil if the request was successful.
+
+If not, call the `log.Fatal` function to print the error message and exit the program.
+
+# I cannot overstate the importance of error checking. Disregard error values at your peril!
+	
+* Hello World on the web: a struct now
+
+.play simple/hello-web-struct.go /START OMIT/,/END OMIT/
+
+* struct (and their composition): extensible types but no classes
+
+- These *struct-types* are *created* *but* *not* *initialized* with the _new_ keyword. Everything is zeroed
+- *Struct* are value types, they get copied when passed along
+- There are pointers to avoid copying struct
+
+-------------------------
+
+*new(T)* => returns *T 
+
+allocates zeroed storage for a new item of type T and returns its address, a value of type *T
+
+* There are other types
+
+There are *other* *types* which under the covers, reference data structures that must be initialized before use, memory is allocated with _make_ in this case. 
+
+They are the types:
+*slice* (~ ArrayList)
+*map* (~ HashMap)
+*channel* (this is new)
+
+-------------------------
+
+*make(T,args)* => returns T
+
+returns an initialized (not zeroed) value of type T (not *T)
+
+* The modern Go side
+
+- cross-platform compilation to native code
+- modern functionality out-of-the-box (networking, websockets, JSON e.g.)
+- orthogonality in the APIs, one way of doing things, no thousands of libraries to import
+- *interfaces* (polymorphism) => sort of type-safe "duck typing"
+- *concurrent* => Go routines and channels
+
+* Interfaces are inferred by the compiler, no explicit "implements"
+
+.play -numbers simple/interfaces.go /START OMIT/,/END OMIT/
+
+* Rob Pike, Go Concurrency Patterns
+
+Video
+
+This talk was presented at Google I/O in June 2012.
+
+.link http://www.youtube.com/watch?v=f6kdp27TYZs Watch the talk on YouTube
+
+The following slides are an excerpt of the beginning.
+
+* Concurrency features in Go
+
+People seemed fascinated by the concurrency features of Go when the language was first announced.
+
+Questions:
+
+- Why is concurrency supported?
+- What is concurrency, anyway?
+- Where does the idea come from?
+- What is it good for?
+- How do I use it?
+
+* Why?
+
+Look around you. What do you see?
+
+Do you see a single-stepping world doing one thing at a time?
+
+Or do you see a complex world of interacting, independently behaving pieces?
+
+That's why. Sequential processing on its own does not model the world's behavior.
+
+* What is concurrency?
+
+Concurrency is the composition of independently executing computations.
+
+Concurrency is a way to structure software, particularly as a way to write clean code that interacts well with the real world.
+
+It is not parallelism.
+
+* Concurrency is not parallelism
+
+Concurrency is not parallelism, although it enables parallelism.
+
+If you have only one processor, your program can still be concurrent  but it cannot be parallel.
+
+On the other hand, a well-written concurrent program might run efficiently in parallel on a multiprocessor. That property could be important...
+
+For more on that distinction, see the link below. Too much to discuss here.
+
+.link http://golang.org/s/concurrency-is-not-parallelism
+
+* A model for software construction
+
+Easy to understand.
+
+Easy to use.
+
+Easy to reason about.
+
+You don't need to be an expert!
+
+(Much nicer than dealing with the minutiae of parallelism (threads, semaphores, locks, barriers, etc.))
+
+# * History
+
+# To many, the concurrency features of Go seemed new.
+
+# But they are rooted in a long history, reaching back to Hoare's CSP in 1978 and even Dijkstra's guarded commands (1975).
+
+# Languages with similar features:
+
+# - Occam (May, 1983)
+# - Erlang (Armstrong, 1986)
+# - Newsqueak (Pike, 1988)
+# - Concurrent ML (Reppy, 1993)
+# - Alef (Winterbottom, 1995)
+# - Limbo (Dorward, Pike, Winterbottom, 1996).
+
+# * Distinction
+
+# Go is the latest on the Newsqueak-Alef-Limbo branch, distinguished by first-class channels.
+
+# Erlang is closer to the original CSP, where you communicate to a process by name rather than over a channel.
+
+# The models are equivalent but express things differently.
+
+# Rough analogy: writing to a file by name (process, Erlang) vs. writing to a file descriptor (channel, Go).
+
+* Basic Examples
+
+* A boring function
+
+We need an example to show the interesting properties of the concurrency primitives.
+
+To avoid distraction, we make it a boring example.
+
+.play concurrency/support/boring.go /START/,/STOP.*/
+
+* Slightly less boring
+
+Make the intervals between messages unpredictable (still under a second).
+
+.play concurrency/support/lessboring.go /START/,/STOP/
+
+* Running it
+
+The boring function runs on forever, like a boring party guest.
+
+.play concurrency/support/lessboring.go /^func.main/,$
+
+* Ignoring it
+
+The go statement runs the function as usual, but doesn't make the caller wait.
+
+It launches a goroutine.
+
+The functionality is analogous to the & on the end of a shell command.
+
+.play concurrency/support/goboring.go 1,/^}/
+
+* Ignoring it a little less
+
+When main returns, the program exits and takes the boring function down with it.
+
+We can hang around a little, and on the way show that both main and the launched goroutine are running.
+
+.play concurrency/support/waitgoboring.go /func.main/,/^}/
+
+* Goroutines
+
+What is a goroutine? It's an independently executing function, launched by a go statement.
+
+It has its own call stack, which grows and shrinks as required.
+
+It's very cheap. It's practical to have thousands, even hundreds of thousands of goroutines.
+
+It's not a thread.
+
+There might be only one thread in a program with thousands of goroutines.
+
+Instead, goroutines are multiplexed dynamically onto threads as needed to keep all the goroutines running.
+
+But if you think of it as a very cheap thread, you won't be far off.
+
+* Communication
+
+Our boring examples cheated: the main function couldn't see the output from the other goroutine.
+
+It was just printed to the screen, where we pretended we saw a conversation.
+
+Real conversations require communication.
+
+* Channels
+
+A channel in Go provides a connection between two goroutines, allowing them to communicate.
+
+.code concurrency/support/helpers.go /START1/,/STOP1/
+.code concurrency/support/helpers.go /START2/,/STOP2/
+.code concurrency/support/helpers.go /START3/,/STOP3/
+
+* Using channels
+
+A channel connects the main and boring goroutines so they can communicate.
+
+.play concurrency/support/changoboring.go /START1/,/STOP1/
+.code concurrency/support/changoboring.go /START2/,/STOP2/
+
+* Synchronization
+
+When the main function executes <–c, it will wait for a value to be sent.
+
+Similarly, when the boring function executes c <– value, it waits for a receiver to be ready.
+
+A sender and receiver must both be ready to play their part in the communication. Otherwise we wait until they are.
+
+Thus channels both communicate and synchronize.
+
+* An aside about buffered channels
+
+Note for experts: Go channels can also be created with a buffer.
+
+Buffering removes synchronization.
+
+Buffering makes them more like Erlang's mailboxes.
+
+Buffered channels can be important for some problems but they are more subtle to reason about.
+
+We won't need them today.
+
+* The Go approach
+
+Don't communicate by sharing memory, share memory by communicating.
+
+* TO RECAP: when use Go?
+
+networking, 
+concurrency, 
+systems language (I used it in place of Python), 
+speed, 
+multi-platform
+
+--------------------
+*There* *is* *more:*
+
+reflection
+C, C++ imports
+testing
+benchmarking and profiling
+live debug memory dumps over HTTP
+go fmt, go vet, go race detector...
+
+* My experience
+
+- open source: ftp4go FTP client, goconvert command line image conversion tool
+- network service to handle a queue of prioritized messages, live profiling: [[http://blog.golang.org/profiling-go-programs]]
+- HTTP reverse proxy (~ nginx) using Revel framework: [[http://revel.github.io/]]
+- Home automation system: Arduino, Raspberry Pi (Go web server on ARM), MQTT libraries in Go
+
+.image concurrency/images/homeautomation.jpg _ 500
+
+* Some links
+- Go by Example: [[https://gobyexample.com/]]
+- Go projects: [[https://code.google.com/p/go-wiki/wiki/Projects]]
+- Concurrency: [[http://blog.golang.org/advanced-go-concurrency-patterns]]
+- Profiling: [[http://blog.golang.org/profiling-go-programs]]
+
+*Some* *projects*
+
+- App Engine: [[https://cloud.google.com/developers/]]
+- YouTube Vitess: [[https://github.com/youtube/vitess]]
+- Heroku ([[https://www.heroku.com/]]) with doozerd: [[https://github.com/ha/doozerd]]
+- skynetservices: [[https://github.com/skynetservices]]
+- camlistore: [[https://camlistore.org/]]
+- godep (Go dependecies): [[https://github.com/tools/godep]]
+
+
+* That's probably plenty for now... Bye
+
+* "Patterns"
+
+* Generator: function that returns a channel
+
+Channels are first-class values, just like strings or integers.
+
+.play concurrency/support/generatorboring.go /START1/,/STOP1/
+.code concurrency/support/generatorboring.go /START2/,/STOP2/
+
+* Channels as a handle on a service
+
+Our boring function returns a channel that lets us communicate with the boring service it provides.
+
+We can have more instances of the service.
+
+.play concurrency/support/generator2boring.go /START1/,/STOP1/
+
+* Multiplexing
+
+These programs make Joe and Ann count in lockstep.
+We can instead use a fan-in function to let whosoever is ready talk.
+
+.code concurrency/support/faninboring.go /START3/,/STOP3/
+.play concurrency/support/faninboring.go /START1/,/STOP1/
+
+* Fan-in
+
+.image concurrency/images/gophermegaphones.jpg
+
+* Standard library
+
+* Packages
+
+Go code lives in packages.
+
+Packages contain type, function, variable, and constant declarations.
+
+Packages can be very small (package `errors` has just one declaration) or very large (package `net/http` has >100 declarations). Most are somewhere in between.
+
+Case determines visibility: `Foo` is exported, `foo` is not
+
+* Tools
+
+* The go tool
+
+The `go` tool is the de facto standard for building and installing Go code.
+
+Compile and run a single-file program:
+
+	$ go run hello.go
+
+Build and install the package in the current directory (and its dependencies):
+
+	$ go install
+
+Build and install the `fmt` package (and its dependencies):
+
+	$ go install fmt
+
+This tool also acts as an interface for most of the Go tools.
+
+* Import paths
+
+The `go` tool is a "zero configuration" tool. No Makefiles or scripts. Just Go code.
+Your build schema and code are always in sync; they are one and the same.
+
+Package import paths mirror the code's location in the file system:
+
+  src/
+    github.com/nf/
+      gosynth/
+        main.go
+        note.go
+        osc.go
+      wav/
+        writer.go
+
+The `gosynth` program imports the `wav` package:
+
+  import "github.com/nf/wav"
+
+Installing `gosynth` will automatically install the `wav` package:
+
+  $ go install github.com/nf/gosynth
+
+* Remote dependencies
+
+The `go` tool also fetches Go code from remote repositories.
+
+Import paths can be URLs:
+
+	import "code.google.com/p/go.net/websocket"
+
+To fetch, build and install a package:
+
+	$ go get code.google.com/p/go.net/websocket
+
+To fetch, build, and install `gosynth` and its dependencies:
+
+	$ go get github.com/nf/gosynth
+
+This simple design leads to other cool tools:
+
+.link http://go.pkgdoc.org
+
+* Godoc
+
+Godoc extracts documentation from Go code and presents it in a variety of forms.
+
+Comments need no special format, they just need to precede what they document.
+
+	// Split slices s into all substrings separated by sep and returns a slice of
+	// the substrings between those separators.
+	// If sep is empty, Split splits after each UTF-8 sequence.
+	// It is equivalent to SplitN with a count of -1.
+	func Split(s, sep string) []string {
+
+.image simple/split.png
+
+Documentation that lives with code is easy to keep up-to-date.
+
+* Gofmt
+
+The `gofmt` tool is a pretty-printer for Go source code.
+
+All Go code in the core is gofmt'd, as is ~70% of open source Go code.
+
+Ends boring formatting discussions.
+
+Improves readability. Improves writability.
+
+Saves a _huge_ amount of time.
+
+* Tests: writing
+
+The `go` tool and the `testing` package provide a lightweight test framework.
+
+.code simple/string_test.go /func TestIndex/,/^}/
+
+* Tests: running
+
+The go tool runs tests.
+
+	$ go test
+	PASS
+
+	$ go test -v
+	=== RUN TestIndex
+	--- PASS: TestIndex (0.00 seconds)
+	PASS
+
+To run the tests for all my projects:
+
+	$ go test github.com/nf/...
+
+* Tests: benchmarks
+
+The `testing` package also supports benchmarks.
+	
+A sample benchmark function:
+
+.code simple/string_test.go /func BenchmarkIndex/,/^}/
+ 
+The benchmark package will vary `b.N` until the benchmark function lasts long enough to be timed reliably.
+
+	$ go test -test.bench=Index
+	PASS
+	BenchmarkIndex	50000000	        37.3 ns/op
+
+* Tests: doc examples
+
+The `testing` package also supports testable examples.
+
+.code simple/string_test.go /func ExampleIndex/,/^}/
+
+Examples and built and run as part of the normal test suite:
+
+	$ go test -v
+	=== RUN: ExampleIndex
+	--- PASS: ExampleIndex (0.00 seconds)
+	PASS
+
+The example is displayed in `godoc` alongside the thing it demonstrates:
+
+.link http://golang.org/pkg/strings/#Index
+
+* And there's more
+
+- `vet`: checks code for common programmer mistakes
+- `pprof`: CPU and memory profiling
+- `fix`: automatically migrate code as APIs change
+- GDB support
+- Editor support: Vim, Emacs, Eclipse, Sublime Text
+
+* Some package examples
+
+
+* io
+
+The `io` package provides fundamental I/O interfaces that are used throughout most Go code.
+
+The most ubiquitous are the `Reader` and `Writer` types, which describe streams of data.
+
+.code simple/io.go
+
+`Reader` and `Writer` implementations include files, sockets, (de)compressors, image and JSON codecs, and many more.
+
+* net/http
+
+The `net/http` package implements an HTTP server and client.
+
+.play simple/hello-web.go
+
+* encoding/json
+
+The `encoding/json` package converts JSON-encoded data to and from native Go data structures.
+
+.play simple/json.go /const/,$
+
+* time
+
+The `time` package provides a representation of time and duration, and other time-related functions.
+
+.play simple/time.go /START/,/END/
+.play simple/time2.go /START/,/END/
+
+`time.Time` values also contain a `time.Location` (for display only):
+
+.play simple/time3.go /START/,/END/
+
+* flag
+
+The `flag` package provides a simple API for parsing command-line flags.
+
+.play simple/flag.go
+
+	$ flag -message 'Hold on...' -delay 5m
+
+
+* An example
+
+* Webfront
+
+`Webfront` is an HTTP server and reverse proxy.
+
+It reads a JSON-formatted rule file like this:
+
+.code simple/webfront/main.go /^\[/,/\]/
+
+For all requests to the host `example.com` (or any name ending in `".example.com"`) it serves files from the `/var/www` directory.
+
+For requests to `example.org`, it forwards the request to the HTTP server listening on localhost port 8080.
+
+* The Rule type
+
+A `Rule` value specifies what to do for a request to a specific host.
+
+.code simple/webfront/main.go /Rule represents/,/^}/
+
+It corresponds directly with the entries in the JSON configuration file.
+
+.code simple/webfront/main.go /^\[/,/\]/
+
+* Rule methods
+
+.code simple/webfront/main.go /Match returns/,/^}/
+.code simple/webfront/main.go /Handler returns/,/^}/
+
+* The Server type
+
+The `Server` type is responsible for loading (and refreshing) the rules from the rule file and serving HTTP requests with the appropriate handler.
+
+.code simple/webfront/main.go /Server implements/,/^}/
+.code simple/webfront/main.go /ServeHTTP matches/,/^}/
+
+* The handler method
+
+.code simple/webfront/main.go /handler returns/,/^}/
+
+* Parsing rules
+
+The `parseRules` function uses the `encoding/json` package to read the rule file into a Go data structure.
+
+.code simple/webfront/main.go /parseRules reads/,/^}/
+
+* The loadRules method
+
+.code simple/webfront/main.go /loadRules tests/,/^}/
+
+* Constructing the server
+
+.code simple/webfront/main.go /NewServer constructs/,/^}/
+
+This constructor function launches a goroutine running the `refreshRules` method.
+
+* Refreshing the rules
+
+.code simple/webfront/main.go /refreshRules polls/,/^}/
+
+* Bringing it all together
+
+The main function parses command-line flags, constructs a `Server`, and launches an HTTP server that serves all requests with the `Server`.
+
+.code simple/webfront/main.go /^var/,/^}/
+
+* Demo
+
+* Testing (1/3)
+
+The `Server` integration test uses the `httptest` package to construct a dummy HTTP server, synthesizes a set of rules, and constructs a `Server` instance that uses those rules.
+
+.code simple/webfront/server_test.go /^func testHandler/,/STOP/
+
+* Testing (2/3)
+
+Each test case in the table specifies a request URL and the expected response code and body.
+
+.code simple/webfront/server_test.go /TESTS START/,/STOP/
+
+* Testing (3/3)
+
+For each test case, construct an `http.Request` for the url and an `httptest.ResponseRecorder` to capture the response, and pass them to the `Server.ServeHTTP` method. Then check that the response matches the test case.
+
+.code simple/webfront/server_test.go /RANGE START/,/^}/
+
+* Demo
+
+* Conclusions
+
+* Further reading
+
+All about Go:
+
+.link http://golang.org
+
+
