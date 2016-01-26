@@ -2,11 +2,15 @@
 
 Install Go and then the Go present tool:    
 
-    go get code.google.com/p/go.tools/cmd/present
+    go get golang.org/x/tools/present
     
 ## Slides ##
 
-Open a command prompt in the directory where is repository has been checked out and launch the present tool:
+Make sure $GOPATH/bin is added to your PATH environment variable.
+
+Open a command prompt in the directory where the repository has been checked out and launch the present tool:
+
+    cd [checkout folder for this repository]
 
     present
 
