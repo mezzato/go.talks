@@ -20,4 +20,4 @@ Open a browser at the specified address and choose the slide file. Normally:
 
 ## Source code ##
 
-The source code to the slide resides in a subfolder named after the slide.
+The source code is linked to into the slides and resides in the subfolders.
