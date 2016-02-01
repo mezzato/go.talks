@@ -2,7 +2,7 @@
 
 Install Go and then the Go present tool:    
 
-    go get golang.org/x/tools/present
+    go get golang.org/x/tools/cmd/present
     
 ## Slides ##
 
